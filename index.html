@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sohan Enterprise Ledger</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#0f5132">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
+</head>
+<body class="light-mode">
+  <!-- PIN Lock Overlay -->
+  <div id="pin-overlay" class="pin-overlay hidden">
+    <div class="pin-card">
+      <div class="pin-icon">🔒</div>
+      <h2>Sohan Enterprise Ledger</h2>
+      <p>Enter 4-Digit Security PIN</p>
+      <div class="pin-dots">
+        <span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="dot"></span>
+      </div>
+      <div id="pin-error" class="pin-error"></div>
+      <div class="keypad">
+        <button class="key-btn" onclick="app.appendPin('1')">1</button>
+        <button class="key-btn" onclick="app.appendPin('2')">2</button>
+        <button class="key-btn" onclick="app.appendPin('3')">3</button>
+        <button class="key-btn" onclick="app.appendPin('4')">4</button>
+        <button class="key-btn" onclick="app.appendPin('5')">5</button>
+        <button class="key-btn" onclick="app.appendPin('6')">6</button>
+        <button class="key-btn" onclick="app.appendPin('7')">7</button>
+        <button class="key-btn" onclick="app.appendPin('8')">8</button>
+        <button class="key-btn" onclick="app.appendPin('9')">9</button>
+        <button class="key-btn empty"></button>
+        <button class="key-btn" onclick="app.appendPin('0')">0</button>
+        <button class="key-btn del-btn" onclick="app.deletePin()">⌫</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-container">
+    <header class="top-bar">
+      <div class="brand" style="display: flex; align-items: center; gap: 12px;">
+        <img src="sohan_logo.png" alt="Logo" style="width: 48px; height: 48px; border-radius: 10px; object-fit: cover;">
+        <div>
+          <h1>Sohan Enterprise Ledger</h1>
+          <p>Daily Mobile Banking Ledger & Profit Tracker</p>
+        </div>
+      </div>
+      <button class="theme-toggle" id="theme-toggle-btn" onclick="app.toggleDarkMode()">🌙</button>
+    </header>
+
+    <main id="main-content">
+      <!-- DASHBOARD VIEW -->
+      <section id="view-dashboard" class="view-section active">
+        <!-- Profit/Loss Primary Card -->
+        <div id="pl-card" class="pl-card">
+          <div class="pl-card-header">
+            <span class="pl-card-title">Net Profit / Loss</span>
+            <span id="pl-badge" class="status-badge">लाभ</span>
+          </div>
+          <div id="pl-amount" class="pl-amount">৳ 0.00</div>
+          <div id="pl-formula" class="pl-formula">Current Total - Total Investment</div>
+        </div>
+
+        <!-- Investment & Total Row -->
+        <div class="summary-grid">
+          <div class="summary-card" onclick="app.openEditModal('totalInvestment')">
+            <div class="card-icon gold">💰</div>
+            <div class="card-label">Total Investment</div>
+            <div id="disp-investment" class="card-value">৳ 100,000.00</div>
+            <span class="edit-hint">Tap to edit</span>
+          </div>
+          <div class="summary-card" onclick="app.openEditModal('all')">
+            <div class="card-icon emerald">📊</div>
+            <div class="card-label">Current Total</div>
+            <div id="disp-current-total" class="card-value">৳ 100,000.00</div>
+            <span class="edit-hint">Calculated sum</span>
+          </div>
+        </div>
+
+        <!-- Account Balances List -->
+        <div class="section-header">
+          <h3>Account Balances</h3>
+          <button class="btn-text" onclick="app.openEditModal('all')">✏️ Edit All</button>
+        </div>
+
+        <div class="accounts-list">
+          <div class="account-card" onclick="app.openEditModal('bkashAgent')">
+            <div class="acc-info">
+              <span class="acc-badge bkash-a">bKash Agent</span>
+              <span class="acc-hint">Tap to update</span>
+            </div>
+            <div id="disp-bkash-agent" class="acc-val">৳ 0.00</div>
+          </div>
+
+          <div class="account-card" onclick="app.openEditModal('personalBkash')">
+            <div class="acc-info">
+              <span class="acc-badge bkash-p">Personal bKash</span>
+              <span class="acc-hint">Tap to update</span>
+            </div>
+            <div id="disp-personal-bkash" class="acc-val">৳ 0.00</div>
+          </div>
+
+          <div class="account-card" onclick="app.openEditModal('nagad')">
+            <div class="acc-info">
+              <span class="acc-badge nagad">Nagad</span>
+              <span class="acc-hint">Tap to update</span>
+            </div>
+            <div id="disp-nagad" class="acc-val">৳ 0.00</div>
+          </div>
+
+          <div class="account-card" onclick="app.openEditModal('cash')">
+            <div class="acc-info">
+              <span class="acc-badge cash">Cash</span>
+              <span class="acc-hint">Tap to update</span>
+            </div>
+            <div id="disp-cash" class="acc-val">৳ 0.00</div>
+          </div>
+        </div>
+
+        <button class="btn-primary" onclick="app.saveDailySnapshot()">🔖 Save Daily Snapshot to History</button>
+      </section>
+
+      <!-- REPORTS VIEW -->
+      <section id="view-reports" class="view-section">
+        <h2>Profit & Loss Reports</h2>
+
+        <div class="period-chips">
+          <button class="chip active" onclick="app.setReportPeriod('TODAY')">Today</button>
+          <button class="chip" onclick="app.setReportPeriod('YESTERDAY')">Yesterday</button>
+          <button class="chip" onclick="app.setReportPeriod('LAST_7_DAYS')">Last 7 Days</button>
+          <button class="chip" onclick="app.setReportPeriod('THIS_MONTH')">This Month</button>
+          <button class="chip" onclick="app.setReportPeriod('LAST_MONTH')">Last Month</button>
+        </div>
+
+        <div id="report-summary-card" class="pl-card mt-16">
+          <div class="pl-card-header">
+            <span id="report-period-label" class="pl-card-title">This Month Summary</span>
+            <span id="report-badge" class="status-badge">लाभ</span>
+          </div>
+          <div id="report-pl-amount" class="pl-amount">৳ 0.00</div>
+          <div id="report-count" class="pl-formula">0 snapshot(s) in selected period</div>
+        </div>
+
+        <div class="chart-container mt-16">
+          <h3>Profit / Loss Trend</h3>
+          <canvas id="profit-chart" width="340" height="180"></canvas>
+        </div>
+      </section>
+
+      <!-- HISTORY VIEW -->
+      <section id="view-history" class="view-section">
+        <div class="section-header">
+          <h2>Snapshot History</h2>
+          <button class="btn-danger-sm" onclick="app.clearAllHistory()">🗑️ Clear All</button>
+        </div>
+
+        <div class="search-box">
+          <input type="text" id="history-search" placeholder="Search by date (YYYY-MM-DD)..." oninput="app.renderHistory()">
+        </div>
+
+        <div id="history-list" class="history-list mt-16">
+          <!-- Dynamically populated -->
+        </div>
+      </section>
+
+      <!-- SETTINGS VIEW -->
+      <section id="view-settings" class="view-section">
+        <h2>Settings & Data Backup</h2>
+
+        <div class="settings-card mt-16">
+          <h3>Security & PIN Lock</h3>
+          <div class="setting-row">
+            <div>
+              <div class="setting-title">Enable PIN Lock</div>
+              <div class="setting-desc">Require 4-digit code on app open</div>
+            </div>
+            <input type="checkbox" id="pin-toggle" onchange="app.togglePinLock(this.checked)">
+          </div>
+        </div>
+
+        <div class="settings-card mt-16">
+          <h3>JSON Backup & Restore</h3>
+          <p class="setting-desc">Export ledger data to JSON or restore from backup.</p>
+          <div class="btn-row mt-12">
+            <button class="btn-secondary" onclick="app.exportJson()">📤 Export JSON</button>
+            <button class="btn-primary" onclick="app.openRestoreModal()">📥 Restore JSON</button>
+          </div>
+        </div>
+
+        <div class="settings-card mt-16">
+          <h3>Testing & Demo</h3>
+          <button class="btn-secondary" onclick="app.loadSampleData()">✨ Load Sample 10-Day History</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Navigation Bar -->
+    <nav class="bottom-nav">
+      <button class="nav-item active" onclick="app.switchTab('dashboard')">
+        <span class="nav-icon">📊</span>
+        <span class="nav-label">Dashboard</span>
+      </button>
+      <button class="nav-item" onclick="app.switchTab('reports')">
+        <span class="nav-icon">📈</span>
+        <span class="nav-label">Reports</span>
+      </button>
+      <button class="nav-item" onclick="app.switchTab('history')">
+        <span class="nav-icon">📜</span>
+        <span class="nav-label">History</span>
+      </button>
+      <button class="nav-item" onclick="app.switchTab('settings')">
+        <span class="nav-icon">⚙️</span>
+        <span class="nav-label">Settings</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Edit Balances Modal -->
+  <div id="modal-edit" class="modal hidden">
+    <div class="modal-content">
+      <h3 id="modal-title">Edit Ledger Balances</h3>
+      <div class="input-group">
+        <label>Total Investment (৳)</label>
+        <input type="number" id="inp-investment">
+      </div>
+      <div class="input-group">
+        <label>bKash Agent Balance (৳)</label>
+        <input type="number" id="inp-bkash-agent">
+      </div>
+      <div class="input-group">
+        <label>Personal bKash Balance (৳)</label>
+        <input type="number" id="inp-personal-bkash">
+      </div>
+      <div class="input-group">
+        <label>Nagad Balance (৳)</label>
+        <input type="number" id="inp-nagad">
+      </div>
+      <div class="input-group">
+        <label>Cash Balance (৳)</label>
+        <input type="number" id="inp-cash">
+      </div>
+      <div class="modal-actions">
+        <button class="btn-secondary" onclick="app.closeModals()">Cancel</button>
+        <button class="btn-primary" onclick="app.saveEditedBalances()">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').catch(err => console.log('SW reg fail:', err));
+    }
+  </script>
+</body>
+</html>

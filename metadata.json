@@ -1,0 +1,6 @@
+{
+  "name": "Sohan Enterprise Ledger",
+  "description": "Daily mobile banking ledger app tracking total investment, bKash, Nagad, Cash balances, and automated profit or loss.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
